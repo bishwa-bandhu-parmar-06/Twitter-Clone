@@ -13,18 +13,30 @@ const userSchema = new mongoose.Schema({
     email: {
         type: String,
         required: true,
-        unique: true
+        unique: true,
+        index: true  // ✅ Improves lookup performance
     },
     password: {
         type: String,
-        required: false, // ✅ Password is now optional for Google login users
+        required: false, // ✅ Optional for OAuth users
     },
-    avatar: String,  // ✅ Added to store Google profile picture
-    phoneNumber: String, // ✅ Added to store Google phone number (if available)
-    otp: String, 
-    otpExpires: Date 
-});
+    avatar: {
+        type: String,
+        default: ''
+    },
+    phoneNumber: String, // ✅ Stores Google phone number
+    otp: String,
+    otpExpires: Date,
+    googleId: {
+        type: String,
+        sparse: true
+    },
+    isVerified: {
+        type: Boolean,
+        default: false
+    }
+}, { timestamps: true });  // ✅ Adds createdAt & updatedAt fields automatically
 
-const userModel = mongoose.model('User', userSchema);
+const User = mongoose.model('User', userSchema);
 
-module.exports = userModel;
+module.exports = User;

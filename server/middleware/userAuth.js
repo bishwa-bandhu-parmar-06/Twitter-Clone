@@ -1,34 +1,42 @@
 const jwt = require("jsonwebtoken");
+const User = require('../models/userModel');
 
 const userAuth = async (req, res, next) => {
     try {
-        let token;
-
-        // ✅ Check for token in Authorization header
-        if (req.headers.authorization && req.headers.authorization.startsWith("Bearer")) {
-            token = req.headers.authorization.split(" ")[1];
-        }
-        // ✅ Check for token in cookies (fallback)
-        else if (req.cookies && req.cookies.token) {
-            token = req.cookies.token;
-        }
-
-        // ❌ No token found
+        const token = req.headers.authorization?.split(' ')[1];
+        
         if (!token) {
-            return res.status(401).json({ success: false, message: "Not Authorized, login again" });
+            return res.status(401).json({ 
+                success: false,
+                message: 'No token provided' 
+            });
         }
 
-        // ✅ Verify token
-        jwt.verify(token, process.env.JWT_SECRET, (err, decoded) => {
-            if (err) {
-                return res.status(401).json({ success: false, message: "Session expired, login again" });
+        try {
+            const decoded = jwt.verify(token, process.env.JWT_SECRET);
+            const user = await User.findById(decoded.userId).select('-password');
+            
+            if (!user) {
+                return res.status(401).json({ 
+                    success: false,
+                    message: 'User not found' 
+                });
             }
-            req.body.userId = decoded.id;
-            next();
-        });
 
+            req.user = user;
+            next();
+        } catch (err) {
+            return res.status(401).json({ 
+                success: false,
+                message: 'Invalid token' 
+            });
+        }
     } catch (error) {
-        res.status(401).json({ success: false, message: "Invalid Token, login again" });
+        console.error('Auth middleware error:', error);
+        return res.status(500).json({ 
+            success: false,
+            message: 'Server error in authentication' 
+        });
     }
 };
 

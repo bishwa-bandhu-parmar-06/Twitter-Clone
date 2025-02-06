@@ -15,7 +15,7 @@ const Dashboard = () => {
 
       if (!token) {
         toast.error("Session expired, please log in again.");
-        navigate("/login");
+        navigate("/");
         return;
       }
 
@@ -33,7 +33,7 @@ const Dashboard = () => {
       } catch (error) {
         console.error("Error fetching user:", error);
         toast.error("Session expired, please log in again.");
-        navigate("/login");
+        navigate("/");
       }
     };
 
@@ -43,16 +43,21 @@ const Dashboard = () => {
   const handleLogout = async () => {
     try {
       await axios.post(`${backendUri}/api/users/logout`, {}, { withCredentials: true });
-
+  
       localStorage.removeItem("authToken");
       delete axios.defaults.headers.common["Authorization"];
-
+  
       toast.success("Logged out successfully!");
-      setTimeout(() => navigate("/login"), 1500);
+  
+      // Forcefully reload authentication state
+      setTimeout(() => {
+        window.location.href = "/"; // Force refresh to ensure clean logout
+      }, 1000);
     } catch (error) {
       toast.error("Logout failed, try again!");
     }
   };
+  
 
   return (
     <div className="min-h-screen bg-gray-100 flex items-center justify-center">

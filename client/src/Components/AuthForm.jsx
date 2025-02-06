@@ -4,10 +4,10 @@ import axios from "axios";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { FcGoogle } from "react-icons/fc"; // Google icon from react-icons
-import { auth, provider } from "../utils/GoogleLogin"
-import { signInWithPopup } from 'firebase/auth';
+import { auth, provider } from "../utils/GoogleLogin";
+import { signInWithPopup } from "firebase/auth";
 
-const AuthForm = () => {
+const AuthForm = ({ setIsAuthenticated }) => {
   const [isLogin, setIsLogin] = useState(true);
   const [isOtpLogin, setIsOtpLogin] = useState(false);
   const [otpSent, setOtpSent] = useState(false);
@@ -21,7 +21,7 @@ const AuthForm = () => {
   });
 
   const navigate = useNavigate();
-  const backendUri = import.meta.env.VITE_BACKEND_URI;
+  const backendUri = import.meta.env.VITE_BACKEND_URI || "http://localhost:3000";
 
   const handleChange = (e) => {
     setUserData({ ...userData, [e.target.name]: e.target.value });
@@ -29,35 +29,32 @@ const AuthForm = () => {
 
   const handleAuth = async (e) => {
     e.preventDefault();
-  
+
     let url = isLogin
       ? `${backendUri}/api/users/login`
       : `${backendUri}/api/users/register`;
-  
+
     if (isOtpLogin && otpSent) {
       url = `${backendUri}/api/users/verify-otp`;
     }
-  
+
     try {
       const response = await axios.post(
         url,
-        isOtpLogin && otpSent
-          ? { email: userData.email, otp }
-          : userData,
+        isOtpLogin && otpSent ? { email: userData.email, otp } : userData,
         { withCredentials: true }
       );
-  
-      toast.success(response.data.message || "Success! Redirecting...");
-  
+
       if (response.data.token) {
         localStorage.setItem("authToken", response.data.token);
         axios.defaults.headers.common["Authorization"] = `Bearer ${response.data.token}`;
+
+        setIsAuthenticated(true);
+        toast.success(response.data.message || "Success! Redirecting...");
+        setTimeout(() => navigate("/feed"), 1000);
       }
-  
-      setTimeout(() => navigate("/dashboard"), 100);
-      toast.error(response.data.message || "Authentication failed.");
     } catch (error) {
-      toast.error(error.response.data.message || "Something went wrong. Please try again.");
+      toast.error(error.response?.data?.message || "Something went wrong. Please try again.");
     }
   };
 
@@ -68,7 +65,10 @@ const AuthForm = () => {
     }
 
     try {
-      const response = await axios.post(`${backendUri}/api/users/send-otp`, { email: userData.email });
+      const response = await axios.post(
+        `${backendUri}/api/users/send-otp`, 
+        { email: userData.email }
+      );
 
       if (response.data.success) {
         toast.success("OTP sent to your email.");
@@ -83,48 +83,53 @@ const AuthForm = () => {
 
   const googleLogin = async () => {
     try {
-      const response = await signInWithPopup(auth, provider);
-      const user = response.user;
-  
+      const result = await signInWithPopup(auth, provider);
+      const user = result.user;
+      
+      console.log('Google user data:', user);
+
+      // Extract relevant data from the Google user object
       const userData = {
-        name: user.displayName || "No Name",
         email: user.email,
-        avatar: user.photoURL || "",
-        phoneNumber: user.phoneNumber || "",
+        name: user.displayName,
+        googleId: user.uid,
+        avatar: user.photoURL
       };
-  
-      const apiResponse = await fetch(`${backendUri}/api/users/google-login`, {
-        method: "POST",
-        credentials: "include",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(userData),
-      });
-  
-      const data = await apiResponse.json();
-  
-      if (!apiResponse.ok) {
-        throw new Error(data.message || "Failed to login");
-      }
-  
-      if (data.success) {
-        toast.success(data.message);
-  
-        localStorage.setItem("authToken", data.token);
-        axios.defaults.headers.common["Authorization"] = `Bearer ${data.token}`;
-  
-        setTimeout(() => navigate("/dashboard"), 1000);
+
+      console.log('Sending to backend:', userData);
+
+      const response = await axios.post(
+        `${backendUri}/api/users/google-auth`,
+        userData,
+        { 
+          withCredentials: true,
+          headers: {
+            'Content-Type': 'application/json'
+          }
+        }
+      );
+
+      if (response.data.success) {
+        localStorage.setItem("authToken", response.data.token);
+        axios.defaults.headers.common["Authorization"] = `Bearer ${response.data.token}`;
+        setIsAuthenticated(true);
+        toast.success("Successfully logged in with Google!");
+        setTimeout(() => navigate("/feed"), 1000);
+      } else {
+        toast.error(response.data.message || "Failed to login with Google");
       }
     } catch (error) {
+      console.error("Google login error:", error);
       if (error.code === "auth/popup-closed-by-user") {
-        toast.error("Google sign-in was closed. Try again.");
+        toast.info("Login cancelled");
+      } else if (error.response) {
+        console.error("Backend error:", error.response.data);
+        toast.error(error.response.data.message || "Failed to login with Google");
       } else {
-        toast.error(`Error: ${error.message}`);
+        toast.error("Failed to login with Google");
       }
     }
   };
-  
-  
-  
 
   return (
     <div className="flex min-h-screen items-center justify-center bg-gray-100">
@@ -189,12 +194,8 @@ const AuthForm = () => {
 
         {/* Google Auth Button */}
         <div className="mt-6 text-center">
-        <button
-            onClick={googleLogin}
-            className="w-full flex items-center justify-center gap-3 bg-white text-gray-700 border border-gray-300 rounded-lg py-2 font-medium shadow-md hover:bg-gray-100 transition-all"
-          >
-            <FcGoogle className="text-2xl" /> 
-            {isLogin ? "Sign in with Google" : "Sign up with Google"}
+          <button onClick={googleLogin} className="w-full flex items-center justify-center gap-3 bg-white text-gray-700 border border-gray-300 rounded-lg py-2 font-medium shadow-md hover:bg-gray-100 transition-all">
+            <FcGoogle className="text-2xl" /> {isLogin ? "Sign in with Google" : "Sign up with Google"}
           </button>
         </div>
       </div>

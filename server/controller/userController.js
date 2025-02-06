@@ -356,3 +356,95 @@ module.exports.getcurrentuser =  async (req, res) => {
         res.status(500).json({ success: false, message: "Internal Server Error" });
     }
 };
+
+module.exports.googleAuth = async (req, res) => {
+  try {
+    console.log('Received Google auth request:', req.body);
+    const { email, name, googleId, avatar } = req.body;
+
+    if (!email) {
+      return res.status(400).json({
+        success: false,
+        message: 'Email is required'
+      });
+    }
+
+    // Check if user exists
+    let user = await userModel.findOne({ email });
+
+    if (!user) {
+      // Create new user if doesn't exist
+      // Generate a unique username from email
+      const baseUsername = email.split('@')[0];
+      let username = baseUsername;
+      let counter = 1;
+      
+      // Check username availability
+      while (await userModel.findOne({ username })) {
+        username = `${baseUsername}${counter}`;
+        counter++;
+      }
+
+      user = new userModel({
+        name: name || email.split('@')[0], // Use name or fallback to email prefix
+        email,
+        username,
+        googleId,
+        avatar: avatar || `https://ui-avatars.com/api/?name=${encodeURIComponent(name || email)}`,
+        isVerified: true // Google users are automatically verified
+      });
+
+      console.log('Creating new user:', user);
+      await user.save();
+    } else {
+      // Update existing user's Google info if needed
+      const updates = {
+        googleId,
+        isVerified: true
+      };
+
+      if (avatar && (!user.avatar || user.avatar !== avatar)) {
+        updates.avatar = avatar;
+      }
+      if (name && (!user.name || user.name !== name)) {
+        updates.name = name;
+      }
+
+      console.log('Updating existing user:', updates);
+      user = await userModel.findByIdAndUpdate(
+        user._id,
+        { $set: updates },
+        { new: true }
+      );
+    }
+
+    // Generate JWT token
+    const token = jwt.sign(
+      { userId: user._id },
+      process.env.JWT_SECRET,
+      { expiresIn: '7d' }
+    );
+
+    console.log('Authentication successful for:', user.email);
+
+    res.status(200).json({
+      success: true,
+      message: 'Google authentication successful',
+      token,
+      user: {
+        _id: user._id,
+        name: user.name,
+        email: user.email,
+        username: user.username,
+        avatar: user.avatar
+      }
+    });
+  } catch (error) {
+    console.error('Google auth error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Error processing Google authentication',
+      error: error.message
+    });
+  }
+};

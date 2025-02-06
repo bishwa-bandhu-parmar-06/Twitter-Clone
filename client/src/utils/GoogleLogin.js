@@ -21,6 +21,13 @@ const app = initializeApp(firebaseConfig);
 const auth = getAuth(app); // Renamed `analytics` to `auth` for clarity
 const provider = new GoogleAuthProvider();
 
+// Configure provider
+provider.setCustomParameters({
+  prompt: 'select_account',
+  // Disable COOP restrictions
+  authType: 'signInWithRedirect',
+});
+
 // Initialize Firebase Analytics (optional, only if you need it)
 const analytics = getAnalytics(app);
 
