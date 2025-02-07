@@ -87,7 +87,8 @@ const Header = ({ setIsAuthenticated }) => {
   return (
     <>
       {/* Sidebar Navigation */}
-      <nav className={`bg-gray-900 text-white h-screen p-5 transition-all duration-300 ${isOpen ? "w-1/5" : "w-16"} fixed left-0 top-0 flex flex-col z-50`}>
+      <nav className={`bg-gray-900 text-white h-169 p-5 transition-all duration-300 ${isOpen ? "w-1/5" : "w-16"} fixed left-0 top-0 bottom-0 flex flex-col z-50`}>
+
         {/* Toggle Button */}
         <button className="text-white mb-5 self-end cursor-pointer" onClick={() => setIsOpen(!isOpen)}>
           {isOpen ? <X size={24} /> : <Menu size={24} />}

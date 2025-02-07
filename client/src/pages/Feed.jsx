@@ -1,11 +1,11 @@
 import React, { useEffect, useState } from "react";
-import { getPosts, createPost } from "../utils/api"; // Import the createPost function
+import { getPosts, createPost, editPost, deletePost } from "../utils/api"; // ✅ Fix: Import editPost & deletePost
 import PostForm from "../Components/postForm";
 import Post from "../Components/Post";
 
 const Feed = () => {
   const [posts, setPosts] = useState([]);
-  const [error, setError] = useState(null); // New state for error handling
+  const [error, setError] = useState(null);
 
   useEffect(() => {
     const fetchPosts = async () => {
@@ -23,65 +23,69 @@ const Feed = () => {
 
   const handlePostSubmit = async (caption, media) => {
     try {
-      console.log('Feed handling post submit:', { caption, media });
+      console.log("Feed handling post submit:", { caption, media });
       const newPost = await createPost(caption, media);
-      setPosts([newPost, ...posts]); // Add the new post at the top
+      setPosts([newPost, ...posts]);
     } catch (error) {
       console.error("Failed to create post:", error);
       setError("Failed to create post. Please try again later.");
     }
   };
 
-  const handlePostDelete = (postId) => {
-    setPosts(posts.filter(post => post._id !== postId));
+  const handleEditPost = async (postId, newCaption) => {
+    try {
+      const response = await editPost(postId, newCaption);
+      setPosts((prevPosts) =>
+        prevPosts.map((post) =>
+          post._id === postId ? { ...post, caption: newCaption } : post
+        )
+      );
+    } catch (error) {
+      console.error("Error editing post:", error);
+    }
   };
 
-  const handlePostUpdate = (updatedPost) => {
-    setPosts(posts.map(post => 
-      post._id === updatedPost._id ? updatedPost : post
-    ));
+  const handleDeletePost = async (postId) => {
+    try {
+      await deletePost(postId);
+      setPosts((prevPosts) => prevPosts.filter((post) => post._id !== postId));
+    } catch (error) {
+      console.error("Error deleting post:", error);
+    }
   };
 
   return (
     <div className="flex min-h-screen bg-gray-50">
-      {/* Left Sidebar Spacing (20%) */}
       <div className="w-[20%] min-w-[250px]"></div>
 
-      {/* Main Content Area */}
       <main className="flex-1 max-w-[700px] w-full mx-auto px-4 py-6">
-        {/* Error Alert */}
         {error && (
           <div className="bg-red-500 text-white p-4 rounded-lg mb-6 shadow-md transition-all duration-300 hover:bg-red-600">
             {error}
           </div>
         )}
 
-        {/* Post Creation Section */}
         <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-4 mb-6">
           <PostForm onPostSubmit={handlePostSubmit} />
         </div>
 
-        {/* Posts Feed */}
         <div className="space-y-6">
-          {posts.map((post) => (
-            <Post 
-              key={post._id} 
-              post={post} 
-              onPostDelete={handlePostDelete}
-              onPostUpdate={handlePostUpdate}
+          {posts.map((post, index) => (
+            <Post
+              key={post._id || index}
+              post={post}
+              onEdit={handleEditPost} // ✅ Fix: Pass correct prop name
+              onDelete={handleDeletePost} // ✅ Fix: Pass correct prop name
             />
           ))}
         </div>
       </main>
 
-      {/* Right Sidebar - Suggestions (20%) */}
       <div className="hidden lg:block w-[20%] min-w-[250px] p-4">
         <div className="sticky top-20">
           <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-4">
             <h2 className="text-lg font-semibold mb-4">Suggestions For You</h2>
-            {/* Add your suggestions content here */}
             <div className="space-y-4">
-              {/* Example suggestion items */}
               <div className="flex items-center justify-between">
                 <div className="flex items-center space-x-3">
                   <div className="w-10 h-10 bg-gray-200 rounded-full"></div>
@@ -94,7 +98,6 @@ const Feed = () => {
                   Follow
                 </button>
               </div>
-              {/* Add more suggestion items as needed */}
             </div>
           </div>
         </div>

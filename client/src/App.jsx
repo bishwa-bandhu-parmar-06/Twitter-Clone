@@ -38,65 +38,40 @@ const App = () => {
   }, []);
 
   return (
-    <BrowserRouter>
-      <div className="min-h-screen bg-gray-50 flex flex-col">
-        {/* Show Header only when authenticated */}
-        {isAuthenticated && <Header setIsAuthenticated={setIsAuthenticated} />}
-        
-        <main className="flex-grow">
-          <Routes>
-            {/* Default route - redirect to /feed if authenticated, otherwise to /auth */}
-            <Route 
-              path="/" 
-              element={isAuthenticated ? <Navigate to="/feed" /> : <Navigate to="/auth" />} 
-            />
-            
-            {/* Protected Routes */}
-            <Route 
-              path="/feed" 
-              element={isAuthenticated ? <Feed /> : <Navigate to="/auth" />} 
-            />
-            <Route
-              path="/dashboard"
-              element={isAuthenticated ? <Dashboard /> : <Navigate to="/auth" />}
-            />
-            <Route
-              path="/explore"
-              element={isAuthenticated ? <Explore /> : <Navigate to="/auth" />}
-            />
-            <Route
-              path="/communities"
-              element={isAuthenticated ? <Communities /> : <Navigate to="/auth" />}
-            />
-            <Route
-              path="/notifications"
-              element={isAuthenticated ? <Notifications /> : <Navigate to="/auth" />}
-            />
-            <Route
-              path="/messages"
-              element={isAuthenticated ? <Messages /> : <Navigate to="/auth" />}
-            />
-            
-            {/* Public Routes */}
-            <Route 
-              path="/auth" 
-              element={!isAuthenticated ? <AuthForm setIsAuthenticated={setIsAuthenticated} /> : <Navigate to="/feed" />} 
-            />
-            <Route path="/forgot-password" element={<ForgotPassword />} />
-            
-            {/* 404 route - catch all unmatched routes */}
-            <Route 
-              path="*" 
-              element={<Navigate to="/" />} 
-            />
-          </Routes>
-        </main>
-
-        {/* Footer is always visible */}
-        <Footer />
-      </div>
-    </BrowserRouter>
-  );
+      <BrowserRouter>
+        <div className="min-h-screen flex flex-col">
+          <div className="flex flex-grow">
+            {/* Sidebar (Header) should only be visible when authenticated */}
+            {isAuthenticated && <Header setIsAuthenticated={setIsAuthenticated} />}
+    
+            {/* Main Content Area */}
+            <main className="flex-grow">
+              <Routes>
+                {/* Redirect Routes */}
+                <Route path="/" element={isAuthenticated ? <Navigate to="/feed" /> : <Navigate to="/auth" />} />
+                <Route path="/feed" element={isAuthenticated ? <Feed /> : <Navigate to="/auth" />} />
+                <Route path="/dashboard" element={isAuthenticated ? <Dashboard /> : <Navigate to="/auth" />} />
+                <Route path="/explore" element={isAuthenticated ? <Explore /> : <Navigate to="/auth" />} />
+                <Route path="/communities" element={isAuthenticated ? <Communities /> : <Navigate to="/auth" />} />
+                <Route path="/notifications" element={isAuthenticated ? <Notifications /> : <Navigate to="/auth" />} />
+                <Route path="/messages" element={isAuthenticated ? <Messages /> : <Navigate to="/auth" />} />
+    
+                {/* Public Routes */}
+                <Route path="/auth" element={!isAuthenticated ? <AuthForm setIsAuthenticated={setIsAuthenticated} /> : <Navigate to="/feed" />} />
+                <Route path="/forgot-password" element={<ForgotPassword />} />
+    
+                {/* 404 Catch-All */}
+                <Route path="*" element={<Navigate to="/" />} />
+              </Routes>
+            </main>
+          </div>
+    
+          {/* Footer - Always at Bottom */}
+          <Footer />
+        </div>
+      </BrowserRouter>
+    );
+    
 };
 
 export default App;

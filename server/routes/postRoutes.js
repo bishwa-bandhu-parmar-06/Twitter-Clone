@@ -21,10 +21,8 @@ router.post('/create', userAuth, upload.single('media'), postController.createPo
 // Route to get all posts
 router.get('/', postController.getPosts);
 
-// Route to add a comment to a post
-router.post('/comment/:postId', userAuth, postController.addComment);
+// Route to edit a post (caption & media)
+router.put('/:id', userAuth, upload.single('media'), postController.updatePost);
 
-// Route to reply to a comment
-router.post('/comment/:postId/reply/:commentId', userAuth, postController.replyToComment);
 
 module.exports = router;
