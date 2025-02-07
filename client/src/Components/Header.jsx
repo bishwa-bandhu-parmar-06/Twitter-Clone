@@ -68,9 +68,34 @@ const Header = ({ setIsAuthenticated }) => {
     }
   };
 
-  const handlePostSubmit = () => {
-    setShowPostModal(false);
+  const handlePostSubmit = async (caption, media) => {
+    try {
+      console.log("Header modal handling post submit:", { caption, media });
+  
+      const token = localStorage.getItem("authToken");
+      if (!token) return;
+  
+      const formData = new FormData();
+      formData.append("caption", caption);
+      if (media) formData.append("media", media); // Append media file
+  
+      const response = await axios.post(`${backendUri}/api/posts/create`, formData, {
+        headers: {
+          "Authorization": `Bearer ${token}`,
+          "Content-Type": "multipart/form-data",
+        },
+      });
+  
+      if (response.data.success) {
+        console.log("Post created successfully:", response.data.post);
+        setShowPostModal(false); // Close modal
+        window.location.reload(); // Refresh feed to reflect new post
+      }
+    } catch (error) {
+      console.error("Error creating post from modal:", error);
+    }
   };
+  
 
   const ProfileImage = ({ user }) => {
     if (!user) return null;

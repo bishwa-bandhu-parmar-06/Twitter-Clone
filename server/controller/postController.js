@@ -125,3 +125,28 @@ exports.updatePost = async (req, res) => {
     res.status(500).json({ success: false, message: "Server error", error: error.message });
   }
 };
+
+// Delete a post
+exports.deletePost = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    // Find the post
+    const post = await Post.findById(id);
+    if (!post) {
+      return res.status(404).json({ message: "Post not found" });
+    }
+
+    // Ensure the user owns the post
+    if (post.user.toString() !== req.user._id.toString()) {
+      return res.status(403).json({ message: "Unauthorized" });
+    }
+
+    // Delete post from the database
+    await Post.findByIdAndDelete(id);
+
+    res.status(200).json({ success: true, message: "Post deleted successfully" });
+  } catch (error) {
+    res.status(500).json({ success: false, message: "Server error", error: error.message });
+  }
+};

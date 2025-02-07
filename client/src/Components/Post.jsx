@@ -36,6 +36,14 @@ const Post = ({ post, onEdit, onDelete }) => {
     onEdit(post._id, editedCaption, editedImage);
     setIsEditing(false);
   };
+  const handleDelete = async () => {
+    try {
+      await onDelete(post._id);
+    } catch (error) {
+      console.error("Failed to delete post:", error);
+    }
+  };
+
 
   return (
     <div className="bg-white rounded-xl shadow-sm border border-gray-100 transition-all duration-300 hover:shadow-md relative">
@@ -90,10 +98,7 @@ const Post = ({ post, onEdit, onDelete }) => {
               </button>
               <button
                 className="flex items-center w-full px-4 py-2 text-sm text-red-600 hover:bg-gray-100"
-                onClick={() => {
-                  setMenuOpen(false);
-                  onDelete(post._id);
-                }}
+                onClick={handleDelete}
               >
                 <Trash2 size={16} className="mr-2" /> Delete Post
               </button>

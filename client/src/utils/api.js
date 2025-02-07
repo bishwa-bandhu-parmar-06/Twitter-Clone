@@ -32,13 +32,14 @@ export const createPost = async (caption, media) => {
 // Delete a post
 export const deletePost = async (postId) => {
   try {
-    const response = await API.delete(/posts/`${postId}`);
+    const response = await API.delete(`/posts/${postId}`);
     return response.data;
   } catch (error) {
     console.error("Error deleting post:", error.response?.data || error.message);
     throw error;
   }
 };
+
 
 // ✅ Fix: Use API to include token automatically
 export const editPost = async (postId, newCaption, newImage) => {

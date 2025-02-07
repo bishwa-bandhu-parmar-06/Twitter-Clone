@@ -5,6 +5,7 @@ import Footer from './Components/Footer';
 import Feed from './pages/Feed';
 import AuthForm from './Components/AuthForm';
 import Dashboard from './pages/Dashboard';
+import Search from "./Components/Search";
 import Explore from './pages/Explore';
 import Communities from './pages/Communities';
 import Notifications from './pages/Notifications';
@@ -51,6 +52,7 @@ const App = () => {
                 <Route path="/" element={isAuthenticated ? <Navigate to="/feed" /> : <Navigate to="/auth" />} />
                 <Route path="/feed" element={isAuthenticated ? <Feed /> : <Navigate to="/auth" />} />
                 <Route path="/dashboard" element={isAuthenticated ? <Dashboard /> : <Navigate to="/auth" />} />
+                <Route path="/search" element={isAuthenticated ? <Search /> : <Navigate to="/auth" />} />
                 <Route path="/explore" element={isAuthenticated ? <Explore /> : <Navigate to="/auth" />} />
                 <Route path="/communities" element={isAuthenticated ? <Communities /> : <Navigate to="/auth" />} />
                 <Route path="/notifications" element={isAuthenticated ? <Notifications /> : <Navigate to="/auth" />} />
