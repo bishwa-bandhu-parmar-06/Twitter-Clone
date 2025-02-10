@@ -68,7 +68,7 @@ export const editPost = async (postId, newCaption, newImage) => {
 
 export const updateUserProfile = async (formData, token) => {
   try {
-      console.log("Calling API with data:", Object.fromEntries(formData.entries()));
+      // console.log("Calling API with data:", Object.fromEntries(formData.entries()));
 
       const response = await API.put("/api/users/update-profile", formData, {
           headers: {
@@ -77,7 +77,7 @@ export const updateUserProfile = async (formData, token) => {
           },
       });
 
-      console.log("API Response:", response.data);
+      // console.log("API Response:", response.data);
       return response.data;
   } catch (error) {
       console.error("Error updating profile:", error.response?.data || error.message);

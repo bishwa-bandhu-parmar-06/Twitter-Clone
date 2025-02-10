@@ -57,7 +57,7 @@ const AuthForm = ({ setIsAuthenticated }) => {
         toast.success(response.data.message || "Success! Redirecting...");
         
         setTimeout(() => {
-          console.log("Redirecting manually...");
+          // console.log("Redirecting manually...");
           toast.success(response.data.message || "Success! Redirecting...");
           navigate("/feed"); // Force redirect
         }, 2000);
@@ -97,7 +97,7 @@ const AuthForm = ({ setIsAuthenticated }) => {
       const result = await signInWithPopup(auth, provider);
       const user = result.user;
       
-      console.log('Google user data:', user);
+      // console.log('Google user data:', user);
 
       // Extract relevant data from the Google user object
       const userData = {
@@ -107,7 +107,7 @@ const AuthForm = ({ setIsAuthenticated }) => {
         avatar: user.photoURL
       };
 
-      console.log('Sending to backend:', userData);
+      // console.log('Sending to backend:', userData);
 
       const response = await axios.post(
         `${backendUri}/api/users/google-auth`,

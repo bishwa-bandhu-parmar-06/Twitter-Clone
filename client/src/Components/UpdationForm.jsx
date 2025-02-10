@@ -20,12 +20,12 @@ const UpdationForm = ({ user, setUser, setIsEditOpen, setUserUpdated }) => {
     formData.append("profileCaption", profileCaption);
 
     if (profileImage) {
-        console.log("Uploading profile image:", profileImage.name);
+        // console.log("Uploading profile image:", profileImage.name);
         formData.append("avatar", profileImage);
     }
 
     if (bannerImage) {
-        console.log("Uploading banner image:", bannerImage.name);
+        // console.log("Uploading banner image:", bannerImage.name);
         formData.append("banner", bannerImage);
     }
 
@@ -36,7 +36,7 @@ const UpdationForm = ({ user, setUser, setIsEditOpen, setUserUpdated }) => {
             },
         });
 
-        console.log("Updated User Data:", response.data.user);
+        // console.log("Updated User Data:", response.data.user);
         setUser(response.data.user);
         setUserUpdated((prev) => !prev);
         setIsEditOpen(false);

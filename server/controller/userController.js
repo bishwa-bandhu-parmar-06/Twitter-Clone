@@ -363,7 +363,7 @@ module.exports.getcurrentuser = async (req, res) => {
         }
 
         // ✅ Debugging: Check what user object contains
-        console.log("Fetched User from DB:", user);
+        // console.log("Fetched User from DB:", user);
 
         res.status(200).json({ success: true, user });
     } catch (error) {
@@ -375,7 +375,7 @@ module.exports.getcurrentuser = async (req, res) => {
 
 module.exports.googleAuth = async (req, res) => {
   try {
-    console.log('Received Google auth request:', req.body);
+    // console.log('Received Google auth request:', req.body);
     const { email, name, googleId, avatar } = req.body;
 
     if (!email) {
@@ -410,7 +410,7 @@ module.exports.googleAuth = async (req, res) => {
         isVerified: true // Google users are automatically verified
       });
 
-      console.log('Creating new user:', user);
+    //   console.log('Creating new user:', user);
       await user.save();
     } else {
       // Update existing user's Google info if needed
@@ -426,7 +426,7 @@ module.exports.googleAuth = async (req, res) => {
         updates.name = name;
       }
 
-      console.log('Updating existing user:', updates);
+    //   console.log('Updating existing user:', updates);
       user = await userModel.findByIdAndUpdate(
         user._id,
         { $set: updates },
@@ -441,7 +441,7 @@ module.exports.googleAuth = async (req, res) => {
       { expiresIn: '7d' }
     );
 
-    console.log('Authentication successful for:', user.email);
+    // console.log('Authentication successful for:', user.email);
 
     res.status(200).json({
       success: true,

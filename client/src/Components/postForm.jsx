@@ -72,7 +72,7 @@ const PostForm = ({ onPostSubmit }) => {
       }
 
       // Log what we're trying to submit
-      console.log('Submitting post with:', { caption, media });
+      // console.log('Submitting post with:', { caption, media });
 
       if (onPostSubmit) {
         await onPostSubmit(caption, media);

@@ -70,7 +70,7 @@ const Header = ({ setIsAuthenticated }) => {
 
   const handlePostSubmit = async (caption, media) => {
     try {
-      console.log("Header modal handling post submit:", { caption, media });
+      // console.log("Header modal handling post submit:", { caption, media });
   
       const token = localStorage.getItem("authToken");
       if (!token) return;
@@ -87,7 +87,7 @@ const Header = ({ setIsAuthenticated }) => {
       });
   
       if (response.data.success) {
-        console.log("Post created successfully:", response.data.post);
+        // console.log("Post created successfully:", response.data.post);
         setShowPostModal(false); // Close modal
         window.location.reload(); // Refresh feed to reflect new post
       }

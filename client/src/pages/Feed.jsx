@@ -23,7 +23,7 @@ const Feed = () => {
 
   const handlePostSubmit = async (caption, media) => {
     try {
-      console.log("Feed handling post submit:", { caption, media });
+      // console.log("Feed handling post submit:", { caption, media });
       const newPost = await createPost(caption, media);
       setPosts([newPost, ...posts]);
     } catch (error) {
