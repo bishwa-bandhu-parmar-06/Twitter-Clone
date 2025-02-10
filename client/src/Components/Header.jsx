@@ -10,7 +10,7 @@ const Header = ({ setIsAuthenticated }) => {
   const [showPostModal, setShowPostModal] = useState(false); // State to toggle the post modal
   const [userData, setUserData] = useState(null);
   const navigate = useNavigate();
-  const backendUri = import.meta.env.VITE_BACKEND_URI || "http://localhost:3000";
+  const backendUri = import.meta.env.VITE_BACKEND_URI;
 
   useEffect(() => {
     const fetchUserData = async () => {
@@ -51,7 +51,7 @@ const Header = ({ setIsAuthenticated }) => {
   const handleLogout = async () => {
     try {
       const token = localStorage.getItem('authToken');
-      await fetch('http://localhost:3000/api/users/logout', {
+      await fetch(`${backendUri}/api/users/logout`, {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${token}`,

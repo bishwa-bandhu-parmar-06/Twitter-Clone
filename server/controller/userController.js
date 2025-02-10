@@ -3,6 +3,12 @@ const jwt = require('jsonwebtoken');
 const userModel = require('../models/userModel');
 const transporter = require('../database/nodemailer');
 
+const { uploadToCloudinary } = require("../utils/cloudinary");
+
+
+
+
+
 
 module.exports.register = async (req, res) => {
     try {
@@ -335,7 +341,11 @@ module.exports.googlelogin = async (req, res) => {
 };
 
 
-module.exports.getcurrentuser =  async (req, res) => {
+
+
+
+
+module.exports.getcurrentuser = async (req, res) => {
     try {
         const token = req.headers.authorization?.split(" ")[1];
 
@@ -344,11 +354,16 @@ module.exports.getcurrentuser =  async (req, res) => {
         }
 
         const decoded = jwt.verify(token, process.env.JWT_SECRET);
-        const user = await userModel.findById(decoded.id).select("-password");
+        const user = await userModel.findById(decoded.id)
+            .select("-password") // Exclude password only
+            .lean(); // Convert to plain object
 
         if (!user) {
             return res.status(404).json({ success: false, message: "User not found" });
         }
+
+        // ✅ Debugging: Check what user object contains
+        console.log("Fetched User from DB:", user);
 
         res.status(200).json({ success: true, user });
     } catch (error) {
@@ -356,6 +371,7 @@ module.exports.getcurrentuser =  async (req, res) => {
         res.status(500).json({ success: false, message: "Internal Server Error" });
     }
 };
+
 
 module.exports.googleAuth = async (req, res) => {
   try {
@@ -446,5 +462,50 @@ module.exports.googleAuth = async (req, res) => {
       message: 'Error processing Google authentication',
       error: error.message
     });
+  }
+};
+
+
+// ✅ Update User Profile
+
+
+module.exports.updateProfile = async (req, res) => {
+  try {
+    const { name, username, profileCaption } = req.body;
+    const userId = req.user.id; // Assuming `userAuth` middleware adds `req.user`
+
+    let avatarUrl, bannerUrl;
+
+    // Check if avatar file is uploaded
+    if (req.files?.avatar) {
+      const avatarBuffer = req.files.avatar[0].buffer;
+      avatarUrl = await uploadToCloudinary(avatarBuffer, "avatars");
+    }
+
+    // Check if banner file is uploaded
+    if (req.files?.banner) {
+      const bannerBuffer = req.files.banner[0].buffer;
+      bannerUrl = await uploadToCloudinary(bannerBuffer, "banners");
+    }
+
+    // Prepare update object
+    const updateData = {
+      ...(name && { name }),
+      ...(username && { username }),
+      ...(profileCaption && { profileCaption }),
+      ...(avatarUrl && { avatar: avatarUrl }),
+      ...(bannerUrl && { banner: bannerUrl }),
+    };
+
+    // Update user in database
+    const updatedUser = await userModel.findByIdAndUpdate(userId, updateData, {
+      new: true,
+      runValidators: true,
+    });
+
+    res.status(200).json({ success: true, user: updatedUser });
+  } catch (error) {
+    console.error("Update failed:", error);
+    res.status(500).json({ success: false, message: "Internal server error" });
   }
 };

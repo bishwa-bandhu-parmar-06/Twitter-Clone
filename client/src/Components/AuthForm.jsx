@@ -21,7 +21,7 @@ const AuthForm = ({ setIsAuthenticated }) => {
   });
 
   const navigate = useNavigate();
-  const backendUri = import.meta.env.VITE_BACKEND_URI || "http://localhost:3000";
+  const backendUri = import.meta.env.VITE_BACKEND_URI;
 
   const handleChange = (e) => {
     setUserData({ ...userData, [e.target.name]: e.target.value });
@@ -44,18 +44,29 @@ const AuthForm = ({ setIsAuthenticated }) => {
         isOtpLogin && otpSent ? { email: userData.email, otp } : userData,
         { withCredentials: true }
       );
-
+    
+      // console.log("Response Data:", response.data); // Add this line
+    
       if (response.data.token) {
+        // console.log("Token received:", response.data.token); // Debugging
         localStorage.setItem("authToken", response.data.token);
         axios.defaults.headers.common["Authorization"] = `Bearer ${response.data.token}`;
-
+    
         setIsAuthenticated(true);
+        // console.log("Authentication state updated:", true);
         toast.success(response.data.message || "Success! Redirecting...");
-        setTimeout(() => navigate("/feed"), 1000);
+        
+        setTimeout(() => {
+          console.log("Redirecting manually...");
+          toast.success(response.data.message || "Success! Redirecting...");
+          navigate("/feed"); // Force redirect
+        }, 2000);
       }
     } catch (error) {
+      console.log("Error Response:", error.response?.data); // Log backend error
       toast.error(error.response?.data?.message || "Something went wrong. Please try again.");
     }
+    
   };
 
   const handleOtpRequest = async () => {

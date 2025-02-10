@@ -2,6 +2,9 @@ const express = require("express");
 const router = express.Router();
 const userController = require("../controller/userController");
 const userAuth = require("../middleware/userAuth");
+const multer = require("multer");
+const upload = multer({ storage: multer.memoryStorage() }); // ✅ Allows image uploads
+
 
 router.post("/register", userController.register);
 router.post("/login", userController.login);
@@ -21,7 +24,9 @@ router.get("/get-current-user", userAuth, async (req, res) => {
         name: req.user.name,
         email: req.user.email,
         username: req.user.username,
-        avatar: req.user.avatar
+        avatar: req.user.avatar,
+        profileCaption: req.user.profileCaption,  // ✅ Include profile caption
+        banner: req.user.banner  // ✅ Include banner image
       }
     });
   } catch (error) {
@@ -54,5 +59,9 @@ router.get('/validate-token', userAuth, (req, res) => {
 });
 
 router.post("/google-auth", userController.googleAuth);
+
+
+// Profile-related routes
+router.put("/update-profile", userAuth, upload.fields([{ name: "avatar" }, { name: "banner" }]), userController.updateProfile);
 
 module.exports = router;

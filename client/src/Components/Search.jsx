@@ -10,7 +10,7 @@ const Search = () => {
   useEffect(() => {
     const fetchUsers = async () => {
       try {
-        const response = await API.get("/users/get-users");
+        const response = await API.get("/api/users/get-users");
         setUsers(response.data.users);
       } catch (error) {
         console.error("Error fetching users:", error);
