@@ -150,3 +150,24 @@ exports.deletePost = async (req, res) => {
     res.status(500).json({ success: false, message: "Server error", error: error.message });
   }
 };
+
+
+
+exports.getPostsByUser = async (req, res) => {
+  try {
+    const { userId } = req.params;
+    const posts = await Post.find({ user: userId })
+      .populate('user', 'username avatar name')
+      .populate('comments.user', 'username avatar name')
+      .populate('comments.replies.user', 'username avatar name')
+      .sort({ createdAt: -1 });
+
+    if (!posts || posts.length === 0) {
+      return res.status(404).json({ message: "No posts found for this user" });
+    }
+
+    res.status(200).json({ posts });
+  } catch (error) {
+    res.status(500).json({ message: 'Server error', error: error.message });
+  }
+};

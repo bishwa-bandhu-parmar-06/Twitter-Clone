@@ -28,5 +28,6 @@ router.put('/:id', userAuth, upload.single('media'), postController.updatePost);
 // Route to delete a post
 router.delete("/:id", userAuth, postController.deletePost);
 
+router.get('/user/:userId', postController.getPostsByUser);
 
 module.exports = router;
